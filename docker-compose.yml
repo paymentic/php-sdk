@@ -1,0 +1,9 @@
+name: paymentic-php-sdk
+services:
+  php:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1

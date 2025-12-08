@@ -1,0 +1,23 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - vendor
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Method .+::getSize\(\) never returns null#'
+        - '#Method .+::getScheme\(\) should return string but returns string\|false#'
+        - '#Method .+::getAuthority\(\) should return string but returns string\|false#'
+        - '#Method .+::getHost\(\) should return string but returns string\|false#'
+        - '#Method .+::getPort\(\) should return int\|null but returns#'
+        - '#Method .+::getPath\(\) should return string but returns string\|false#'
+        - '#Method .+::getQuery\(\) should return string but returns string\|false#'
+        - '#Parameter .+MockRequestFactory.+expects string, .+ given#'
+        - '#Property .+MockRequestFactory.+\$headers type has no value type#'
+        - '#Cannot call method make\(\) on Illuminate\\Foundation\\Application\|null#'
+        - '#Cannot call method assertSuccessful\(\) on Illuminate\\Testing\\PendingCommand\|int#'
+        - '#Offset .+ might not exist on Illuminate\\Foundation\\Application\|null#'
+        - '#does not specify its types: T#'
+        - '#Cannot call method getAlias\(\) on .+\|null#'

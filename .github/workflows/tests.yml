@@ -1,0 +1,174 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+
+    name: PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: vendor/bin/phpunit --no-coverage --colors=always
+
+  laravel:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+        laravel: ['11.*', '12.*']
+        exclude:
+          - php: '8.2'
+            laravel: '12.*'
+
+    name: Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json
+          coverage: none
+
+      - name: Install Laravel ${{ matrix.laravel }}
+        run: |
+          composer remove symfony/http-kernel symfony/config symfony/dependency-injection symfony/http-client --dev --no-update
+          composer require "illuminate/http:${{ matrix.laravel }}" \
+                          "illuminate/support:${{ matrix.laravel }}" \
+                          "illuminate/contracts:${{ matrix.laravel }}" \
+                          "orchestra/testbench:*" \
+                          --dev --no-update
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run Laravel integration tests
+        run: vendor/bin/phpunit --testsuite=Laravel --no-coverage --colors=always
+
+  symfony:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+        symfony: ['7.0', '7.1', '7.2', '8.0']
+        exclude:
+          - php: '8.2'
+            symfony: '8.0'
+          - php: '8.3'
+            symfony: '8.0'
+
+    name: Symfony ${{ matrix.symfony }} / PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json
+          coverage: none
+
+      - name: Install Symfony ${{ matrix.symfony }}
+        run: |
+          composer remove illuminate/http illuminate/support illuminate/contracts orchestra/testbench --dev --no-update
+          composer require "symfony/http-kernel:^${{ matrix.symfony }}" \
+                          "symfony/config:^${{ matrix.symfony }}" \
+                          "symfony/dependency-injection:^${{ matrix.symfony }}" \
+                          "symfony/http-client:^${{ matrix.symfony }}" \
+                          --dev --no-update
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run Symfony integration tests
+        run: vendor/bin/phpunit --testsuite=Symfony --no-coverage --colors=always
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: Code Coverage
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, json
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml --colors=always
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: PHPStan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, json
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=512M
+

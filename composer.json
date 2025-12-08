@@ -1,0 +1,81 @@
+{
+  "name": "paymentic/php-sdk",
+  "type": "library",
+  "description": "Paymentic SDK for PHP",
+  "homepage": "https://www.paymentic.com",
+  "license": "MIT",
+  "keywords": [
+    "paymentic",
+    "payment",
+    "api",
+    "sdk"
+  ],
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "psr/http-client": "^1.0",
+    "psr/http-factory": "^1.0",
+    "psr/http-message": "^1.0 || ^2.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0||^12.0",
+    "phpstan/phpstan": "^1.0||^2.0",
+    "friendsofphp/php-cs-fixer": "^2.0||^3.0",
+    "guzzlehttp/guzzle": "^6.3||^7.0",
+    "guzzlehttp/psr7": "^1.4||^2.0",
+    "illuminate/http": "^11.0||^12.0",
+    "illuminate/support": "^11.0||^12.0",
+    "illuminate/contracts": "^11.0||^12.0",
+    "orchestra/testbench": "^9.0||^10.0",
+    "symfony/http-kernel": "^7.0||^8.0",
+    "symfony/config": "^7.0||^8.0",
+    "symfony/dependency-injection": "^7.0||^8.0",
+    "symfony/http-client": "^7.0||^8.0"
+  },
+  "suggest": {
+    "guzzlehttp/guzzle": "For using Guzzle HTTP client implementation",
+    "illuminate/http": "Required for Laravel HTTP client integration (^10.0|^11.0)",
+    "illuminate/support": "Required for Laravel integration (^10.0|^11.0)",
+    "symfony/http-kernel": "Required for Symfony integration (^7.0|^8.0)",
+    "symfony/config": "Required for Symfony integration (^7.0|^8.0)",
+    "symfony/dependency-injection": "Required for Symfony integration (^7.0|^8.0)",
+    "symfony/http-client": "Required for Symfony HTTP client integration (^7.0|^8.0)"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Paymentic\\Sdk\\Integration\\Laravel\\PaymenticServiceProvider"
+      ]
+    },
+    "symfony": {
+      "bundles": {
+        "Paymentic\\Sdk\\Integration\\Symfony\\PaymenticBundle": [
+          "all"
+        ]
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Paymentic\\Sdk\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Paymentic\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-html coverage",
+    "phpstan": "phpstan analyse src tests --level=8",
+    "cs-fix": "php-cs-fixer fix",
+    "cs-check": "php-cs-fixer fix --dry-run --diff"
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
