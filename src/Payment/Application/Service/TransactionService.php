@@ -38,6 +38,7 @@ final readonly class TransactionService implements TransactionServiceContract
     /**
      * @throws PaymenticException
      * @throws JsonException
+     * @throws Exception
      */
     public function get(string $pointId, string $transactionId): Transaction
     {
