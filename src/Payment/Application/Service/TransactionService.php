@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Paymentic\Sdk\Payment\Application\Service;
 
 use Exception;
+use JsonException;
 use Paymentic\Sdk\Payment\Application\Contract\TransactionServiceContract;
 use Paymentic\Sdk\Payment\Application\DTO\CreateTransactionRequest;
 use Paymentic\Sdk\Payment\Application\DTO\CreateTransactionResponse;
 use Paymentic\Sdk\Payment\Application\Mapper\TransactionMapper;
 use Paymentic\Sdk\Payment\Domain\Entity\Transaction;
+use Paymentic\Sdk\Shared\Exception\PaymenticException;
 use Paymentic\Sdk\Shared\Http\HttpClient;
 
 final readonly class TransactionService implements TransactionServiceContract
@@ -19,6 +21,10 @@ final readonly class TransactionService implements TransactionServiceContract
     ) {
     }
 
+    /**
+     * @throws PaymenticException
+     * @throws JsonException
+     */
     public function create(string $pointId, CreateTransactionRequest $request): CreateTransactionResponse
     {
         $response = $this->httpClient->post(
@@ -30,7 +36,8 @@ final readonly class TransactionService implements TransactionServiceContract
     }
 
     /**
-     * @throws Exception
+     * @throws PaymenticException
+     * @throws JsonException
      */
     public function get(string $pointId, string $transactionId): Transaction
     {
@@ -41,6 +48,10 @@ final readonly class TransactionService implements TransactionServiceContract
         return TransactionMapper::fromArray($response['data']);
     }
 
+    /**
+     * @throws PaymenticException
+     * @throws JsonException
+     */
     public function capture(string $pointId, string $transactionId): void
     {
         $this->httpClient->patch(
