@@ -16,7 +16,7 @@ use Paymentic\Sdk\Shared\Enum\Currency;
 final readonly class CreateTransactionRequest
 {
     /**
-     * @param array<CartItem> $cart
+     * @param array<CartItem>|null $cart
      */
     public function __construct(
         public string $amount,
