@@ -24,6 +24,8 @@ final readonly class HttpClient
     /**
      * @param array<string, mixed> $data
      * @return array<string, mixed>
+     * @throws JsonException
+     * @throws PaymenticException
      */
     public function post(string $uri, array $data = []): array
     {
@@ -32,6 +34,8 @@ final readonly class HttpClient
 
     /**
      * @return array<string, mixed>
+     * @throws JsonException
+     * @throws PaymenticException
      */
     public function get(string $uri): array
     {
@@ -41,6 +45,8 @@ final readonly class HttpClient
     /**
      * @param array<string, mixed> $data
      * @return array<string, mixed>
+     * @throws JsonException
+     * @throws PaymenticException
      */
     public function patch(string $uri, array $data = []): array
     {
