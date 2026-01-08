@@ -18,7 +18,7 @@ final class AddressTest extends TestCase
             firstName: 'Jan',
             lastName: 'Kowalski',
             street: 'Główna',
-            building: '10',
+            buildingNumber: '10',
             flat: '5A',
             city: 'Warszawa',
             region: 'Mazowieckie',
@@ -33,7 +33,7 @@ final class AddressTest extends TestCase
         $this->assertSame('Jan', $address->firstName);
         $this->assertSame('Kowalski', $address->lastName);
         $this->assertSame('Główna', $address->street);
-        $this->assertSame('10', $address->building);
+        $this->assertSame('10', $address->buildingNumber);
         $this->assertSame('5A', $address->flat);
         $this->assertSame('Warszawa', $address->city);
         $this->assertSame('Mazowieckie', $address->region);
@@ -53,7 +53,7 @@ final class AddressTest extends TestCase
         $this->assertNull($address->firstName);
         $this->assertNull($address->lastName);
         $this->assertNull($address->street);
-        $this->assertNull($address->building);
+        $this->assertNull($address->buildingNumber);
         $this->assertNull($address->flat);
         $this->assertNull($address->city);
         $this->assertNull($address->region);
@@ -72,7 +72,7 @@ final class AddressTest extends TestCase
             firstName: 'Anna',
             lastName: 'Nowak',
             street: 'Kwiatowa',
-            building: '5',
+            buildingNumber: '5',
             city: 'Kraków',
             postalCode: '30-001',
             country: 'PL',
@@ -83,7 +83,7 @@ final class AddressTest extends TestCase
         $this->assertSame('Anna', $array['firstName']);
         $this->assertSame('Nowak', $array['lastName']);
         $this->assertSame('Kwiatowa', $array['street']);
-        $this->assertSame('5', $array['building']);
+        $this->assertSame('5', $array['buildingNumber']);
         $this->assertSame('Kraków', $array['city']);
         $this->assertSame('30-001', $array['postalCode']);
         $this->assertSame('PL', $array['country']);
