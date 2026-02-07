@@ -12,4 +12,6 @@ enum PaymentMethod: string
     case CARD = 'CARD';
     case MOBILE_WALLET = 'MOBILE_WALLET';
     case PAYSAFE = 'PAYSAFE';
+    case MW = 'MW';
+    case PAYPAL = 'PAYPAL';
 }

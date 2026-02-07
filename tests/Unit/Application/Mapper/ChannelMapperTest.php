@@ -155,13 +155,15 @@ final class ChannelMapperTest extends TestCase
     #[Test]
     public function mapsAllPaymentMethods(): void
     {
-        $methods = ['BLIK', 'PBL', 'BNPL', 'CARD', 'MOBILE_WALLET'];
+        $methods = ['BLIK', 'PBL', 'BNPL', 'CARD', 'MOBILE_WALLET', 'MW', 'PAYPAL'];
         $expectedEnums = [
             PaymentMethod::BLIK,
             PaymentMethod::PBL,
             PaymentMethod::BNPL,
             PaymentMethod::CARD,
             PaymentMethod::MOBILE_WALLET,
+            PaymentMethod::MW,
+            PaymentMethod::PAYPAL,
         ];
 
         foreach ($methods as $index => $method) {
