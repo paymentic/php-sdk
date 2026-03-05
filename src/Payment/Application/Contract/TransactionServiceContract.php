@@ -6,6 +6,8 @@ namespace Paymentic\Sdk\Payment\Application\Contract;
 
 use Paymentic\Sdk\Payment\Application\DTO\CreateTransactionRequest;
 use Paymentic\Sdk\Payment\Application\DTO\CreateTransactionResponse;
+use Paymentic\Sdk\Payment\Application\DTO\ListTransactionsRequest;
+use Paymentic\Sdk\Payment\Application\DTO\ListTransactionsResponse;
 use Paymentic\Sdk\Payment\Domain\Entity\Transaction;
 
 interface TransactionServiceContract
@@ -15,4 +17,6 @@ interface TransactionServiceContract
     public function get(string $pointId, string $transactionId): Transaction;
 
     public function capture(string $pointId, string $transactionId): void;
+
+    public function list(string $pointId, ?ListTransactionsRequest $request = null): ListTransactionsResponse;
 }

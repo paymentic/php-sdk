@@ -13,6 +13,9 @@ use Paymentic\Sdk\Payment\Domain\ValueObject\ChannelAmount;
 use Paymentic\Sdk\Payment\Domain\ValueObject\ChannelAuthorization;
 use Paymentic\Sdk\Payment\Domain\ValueObject\ChannelCommission;
 use Paymentic\Sdk\Payment\Domain\ValueObject\ChannelImage;
+use Paymentic\Sdk\Payment\Domain\ValueObject\ComplianceContent;
+use Paymentic\Sdk\Payment\Domain\ValueObject\ComplianceItem;
+use Paymentic\Sdk\Payment\Domain\ValueObject\ComplianceLink;
 
 final readonly class ChannelMapper
 {
@@ -47,6 +50,8 @@ final readonly class ChannelMapper
                 ),
             ),
             paymentType: $data['paymentType'],
+            aliases: $data['aliases'] ?? null,
+            compliance: isset($data['compliance']) ? self::mapCompliance($data['compliance']) : null,
             enablingAt: isset($data['enablingAt']) ? new DateTimeImmutable($data['enablingAt']) : null,
             disablingAt: isset($data['disablingAt']) ? new DateTimeImmutable($data['disablingAt']) : null,
         );
@@ -63,5 +68,38 @@ final readonly class ChannelMapper
             static fn (array $item): Channel => self::fromArray($item),
             $data,
         );
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return ComplianceItem[]
+     */
+    private static function mapCompliance(array $items): array
+    {
+        return array_map(static function (array $item): ComplianceItem {
+            $content = isset($item['content']) ? new ComplianceContent(
+                text: $item['content']['text'] ?? null,
+                html: $item['content']['html'] ?? null,
+                markdown: $item['content']['markdown'] ?? null,
+            ) : null;
+
+            $links = array_map(
+                static fn (array $link): ComplianceLink => new ComplianceLink(
+                    id: $link['id'] ?? null,
+                    label: $link['label'] ?? null,
+                    url: $link['url'] ?? null,
+                ),
+                $item['links'] ?? [],
+            );
+
+            return new ComplianceItem(
+                id: $item['id'],
+                type: $item['type'],
+                required: $item['required'],
+                checked: $item['checked'] ?? null,
+                content: $content,
+                links: $links,
+            );
+        }, $items);
     }
 }

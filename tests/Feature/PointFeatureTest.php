@@ -204,6 +204,88 @@ final class PointFeatureTest extends TestCase
         $this->assertSame('2025-12-31', $channel->disablingAt->format('Y-m-d'));
     }
 
+    /**
+     * @throws JsonException
+     */
+    #[Test]
+    public function handlesChannelWithAliasesAndCompliance(): void
+    {
+        $responseBody = json_encode([
+            'data' => [
+                [
+                    'id' => 'blik',
+                    'available' => true,
+                    'method' => 'BLIK',
+                    'name' => 'BLIK',
+                    'image' => [
+                        'default' => 'https://example.com/blik.png',
+                    ],
+                    'amount' => [
+                        'minimum' => '0.01',
+                        'maximum' => '10000.00',
+                    ],
+                    'currencies' => ['PLN'],
+                    'commission' => [
+                        'value' => '0.90',
+                        'minimum' => '0.20',
+                        'fixed' => null,
+                    ],
+                    'authorization' => [
+                        'type' => ['MULTI_FACTOR'],
+                    ],
+                    'paymentType' => 'INSTANT',
+                    'aliases' => ['blik-code', 'blik-psp'],
+                    'compliance' => [
+                        [
+                            'id' => 'info_gdpr',
+                            'type' => 'DISPLAYABLE',
+                            'required' => false,
+                            'checked' => null,
+                            'content' => [
+                                'text' => 'Administratorem Twoich danych jest Paymentic...',
+                                'html' => 'Administratorem Twoich danych jest <b>Paymentic</b>...',
+                                'markdown' => 'Administratorem Twoich danych jest **Paymentic**...',
+                            ],
+                            'links' => [
+                                [
+                                    'id' => 'privacy_policy',
+                                    'label' => 'Polityka prywatności',
+                                    'url' => 'https://example.com/pp.pdf',
+                                ],
+                            ],
+                        ],
+                    ],
+                    'enablingAt' => null,
+                    'disablingAt' => null,
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $client = $this->createClient($responseBody, 200);
+
+        $channels = $client->payment()->points()->getChannels('b8e6e2fc');
+
+        $this->assertCount(1, $channels);
+        $channel = $channels[0];
+
+        $this->assertSame(['blik-code', 'blik-psp'], $channel->aliases);
+
+        $this->assertNotNull($channel->compliance);
+        $this->assertCount(1, $channel->compliance);
+
+        $compliance = $channel->compliance[0];
+        $this->assertSame('info_gdpr', $compliance->id);
+        $this->assertSame('DISPLAYABLE', $compliance->type);
+        $this->assertFalse($compliance->required);
+        $this->assertNull($compliance->checked);
+        $this->assertNotNull($compliance->content);
+        $this->assertSame('Administratorem Twoich danych jest Paymentic...', $compliance->content->text);
+        $this->assertCount(1, $compliance->links);
+        $this->assertSame('privacy_policy', $compliance->links[0]->id);
+        $this->assertSame('Polityka prywatności', $compliance->links[0]->label);
+        $this->assertSame('https://example.com/pp.pdf', $compliance->links[0]->url);
+    }
+
     private function createClient(string $responseBody, int $statusCode): PaymenticClient
     {
         return PaymenticClientFactory::create('test-api-key')
