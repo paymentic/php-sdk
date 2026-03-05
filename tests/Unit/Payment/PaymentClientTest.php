@@ -7,6 +7,7 @@ namespace Paymentic\Tests\Unit\Payment;
 use Paymentic\Sdk\Payment\Application\Contract\BlikServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\PointServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\RefundServiceContract;
+use Paymentic\Sdk\Payment\Application\Contract\SystemServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\TransactionServiceContract;
 use Paymentic\Sdk\Payment\PaymentClient;
 use Paymentic\Tests\Support\MockHttpClientFactory;
@@ -48,6 +49,14 @@ final class PaymentClientTest extends TestCase
     }
 
     #[Test]
+    public function returnsSystemService(): void
+    {
+        $client = new PaymentClient(MockHttpClientFactory::create());
+
+        $this->assertInstanceOf(SystemServiceContract::class, $client->system());
+    }
+
+    #[Test]
     public function returnsSameServiceInstance(): void
     {
         $client = new PaymentClient(MockHttpClientFactory::create());
@@ -56,5 +65,6 @@ final class PaymentClientTest extends TestCase
         $this->assertSame($client->refunds(), $client->refunds());
         $this->assertSame($client->blik(), $client->blik());
         $this->assertSame($client->points(), $client->points());
+        $this->assertSame($client->system(), $client->system());
     }
 }

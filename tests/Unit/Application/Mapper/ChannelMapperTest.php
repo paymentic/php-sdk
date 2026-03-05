@@ -201,6 +201,113 @@ final class ChannelMapperTest extends TestCase
     }
 
     /**
+     * @throws Exception
+     */
+    #[Test]
+    public function mapsChannelWithAliases(): void
+    {
+        $data = $this->createMinimalChannelData([
+            'aliases' => ['alias-1', 'alias-2'],
+        ]);
+
+        $channel = ChannelMapper::fromArray($data);
+
+        $this->assertSame(['alias-1', 'alias-2'], $channel->aliases);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function mapsChannelWithNullAliases(): void
+    {
+        $data = $this->createMinimalChannelData();
+
+        $channel = ChannelMapper::fromArray($data);
+
+        $this->assertNull($channel->aliases);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function mapsChannelWithCompliance(): void
+    {
+        $data = $this->createMinimalChannelData([
+            'compliance' => [
+                [
+                    'id' => 'info_gdpr',
+                    'type' => 'DISPLAYABLE',
+                    'required' => false,
+                    'checked' => null,
+                    'content' => [
+                        'text' => 'GDPR info text',
+                        'html' => '<b>GDPR</b> info',
+                        'markdown' => '**GDPR** info',
+                    ],
+                    'links' => [
+                        [
+                            'id' => 'privacy_policy',
+                            'label' => 'Privacy Policy',
+                            'url' => 'https://example.com/pp.pdf',
+                        ],
+                    ],
+                ],
+                [
+                    'id' => 'consent_terms',
+                    'type' => 'ACCEPTABLE',
+                    'required' => true,
+                    'checked' => false,
+                    'content' => [
+                        'text' => 'I accept terms',
+                    ],
+                    'links' => [],
+                ],
+            ],
+        ]);
+
+        $channel = ChannelMapper::fromArray($data);
+
+        $this->assertNotNull($channel->compliance);
+        $this->assertCount(2, $channel->compliance);
+
+        $gdpr = $channel->compliance[0];
+        $this->assertSame('info_gdpr', $gdpr->id);
+        $this->assertSame('DISPLAYABLE', $gdpr->type);
+        $this->assertFalse($gdpr->required);
+        $this->assertNull($gdpr->checked);
+        $this->assertNotNull($gdpr->content);
+        $this->assertSame('GDPR info text', $gdpr->content->text);
+        $this->assertSame('<b>GDPR</b> info', $gdpr->content->html);
+        $this->assertSame('**GDPR** info', $gdpr->content->markdown);
+        $this->assertCount(1, $gdpr->links);
+        $this->assertSame('privacy_policy', $gdpr->links[0]->id);
+        $this->assertSame('Privacy Policy', $gdpr->links[0]->label);
+        $this->assertSame('https://example.com/pp.pdf', $gdpr->links[0]->url);
+
+        $terms = $channel->compliance[1];
+        $this->assertSame('consent_terms', $terms->id);
+        $this->assertSame('ACCEPTABLE', $terms->type);
+        $this->assertTrue($terms->required);
+        $this->assertFalse($terms->checked);
+        $this->assertCount(0, $terms->links);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function mapsChannelWithNullCompliance(): void
+    {
+        $data = $this->createMinimalChannelData();
+
+        $channel = ChannelMapper::fromArray($data);
+
+        $this->assertNull($channel->compliance);
+    }
+
+    /**
      * @param array<string, mixed> $overrides
      * @return array<string, mixed>
      */

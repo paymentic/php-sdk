@@ -7,10 +7,12 @@ namespace Paymentic\Sdk\Payment;
 use Paymentic\Sdk\Payment\Application\Contract\BlikServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\PointServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\RefundServiceContract;
+use Paymentic\Sdk\Payment\Application\Contract\SystemServiceContract;
 use Paymentic\Sdk\Payment\Application\Contract\TransactionServiceContract;
 use Paymentic\Sdk\Payment\Application\Service\BlikService;
 use Paymentic\Sdk\Payment\Application\Service\PointService;
 use Paymentic\Sdk\Payment\Application\Service\RefundService;
+use Paymentic\Sdk\Payment\Application\Service\SystemService;
 use Paymentic\Sdk\Payment\Application\Service\TransactionService;
 use Paymentic\Sdk\Shared\Http\HttpClient;
 
@@ -20,6 +22,7 @@ final class PaymentClient
     private RefundServiceContract $refundService;
     private BlikServiceContract $blikService;
     private PointServiceContract $pointService;
+    private SystemServiceContract $systemService;
 
     public function __construct(
         HttpClient $httpClient,
@@ -28,6 +31,7 @@ final class PaymentClient
         $this->refundService = new RefundService($httpClient);
         $this->blikService = new BlikService($httpClient);
         $this->pointService = new PointService($httpClient);
+        $this->systemService = new SystemService($httpClient);
     }
 
     public function transactions(): TransactionServiceContract
@@ -48,5 +52,10 @@ final class PaymentClient
     public function points(): PointServiceContract
     {
         return $this->pointService;
+    }
+
+    public function system(): SystemServiceContract
+    {
+        return $this->systemService;
     }
 }
