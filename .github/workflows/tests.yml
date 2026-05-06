@@ -52,11 +52,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
-        laravel: ['11.*', '12.*']
+        php: ['8.2', '8.3', '8.4', '8.5']
+        laravel: ['11.*', '12.*', '13.*']
         exclude:
           - php: '8.2'
             laravel: '12.*'
+          - php: '8.2'
+            laravel: '13.*'
 
     name: Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }}
 
@@ -90,7 +92,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        php: ['8.2', '8.3', '8.4', '8.5']
         symfony: ['7.0', '7.1', '7.2', '8.0']
         exclude:
           - php: '8.2'

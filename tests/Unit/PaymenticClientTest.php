@@ -66,6 +66,84 @@ final class PaymenticClientTest extends TestCase
         $this->assertInstanceOf(PaymentClient::class, $client->payment());
     }
 
+    #[Test]
+    public function productionEnvironmentResolvesToProductionBaseUrl(): void
+    {
+        $mockClient = new MockPsrClient($this->validPingResponse());
+        $client = new PaymenticClient(
+            apiKey: 'test-api-key',
+            httpClient: $mockClient,
+            requestFactory: new MockRequestFactory(),
+            streamFactory: new MockStreamFactory(),
+            environment: Environment::PRODUCTION,
+        );
+
+        $client->payment()->system()->ping();
+
+        $this->assertSame(
+            'https://api.paymentic.com/v1_2/payment/ping',
+            (string) $mockClient->getLastRequest()?->getUri(),
+        );
+    }
+
+    #[Test]
+    public function sandboxEnvironmentResolvesToSandboxBaseUrl(): void
+    {
+        $mockClient = new MockPsrClient($this->validPingResponse());
+        $client = new PaymenticClient(
+            apiKey: 'test-api-key',
+            httpClient: $mockClient,
+            requestFactory: new MockRequestFactory(),
+            streamFactory: new MockStreamFactory(),
+            environment: Environment::SANDBOX,
+        );
+
+        $client->payment()->system()->ping();
+
+        $this->assertSame(
+            'https://api.sandbox.paymentic.com/v1_2/payment/ping',
+            (string) $mockClient->getLastRequest()?->getUri(),
+        );
+    }
+
+    #[Test]
+    public function customBaseUrlOverridesEnvironment(): void
+    {
+        $mockClient = new MockPsrClient($this->validPingResponse());
+        $client = new PaymenticClient(
+            apiKey: 'test-api-key',
+            httpClient: $mockClient,
+            requestFactory: new MockRequestFactory(),
+            streamFactory: new MockStreamFactory(),
+            environment: Environment::PRODUCTION,
+            baseUrl: 'https://api.staging.paymentic.com/v1_2',
+        );
+
+        $client->payment()->system()->ping();
+
+        $this->assertSame(
+            'https://api.staging.paymentic.com/v1_2/payment/ping',
+            (string) $mockClient->getLastRequest()?->getUri(),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validPingResponse(): array
+    {
+        return [
+            'data' => [
+                'message' => 'pong',
+                'environment' => 'sandbox',
+                'tokenId' => 'token-id',
+                'clientId' => 'client-id',
+                'version' => '1.0',
+                'scopes' => [],
+            ],
+        ];
+    }
+
     private function createClient(): PaymenticClient
     {
         return new PaymenticClient(

@@ -11,28 +11,10 @@ use PHPUnit\Framework\TestCase;
 final class EnvironmentTest extends TestCase
 {
     #[Test]
-    public function productionReturnsCorrectBaseUrl(): void
-    {
-        $this->assertSame(
-            'https://api.paymentic.com/v1_2',
-            Environment::PRODUCTION->getBaseUrl(),
-        );
-    }
-
-    #[Test]
-    public function sandboxReturnsCorrectBaseUrl(): void
-    {
-        $this->assertSame(
-            'https://api.sandbox.paymentic.com/v1_2',
-            Environment::SANDBOX->getBaseUrl(),
-        );
-    }
-
-    #[Test]
     public function productionHasCorrectValue(): void
     {
         $this->assertSame(
-            'https://api.paymentic.com/v1_2',
+            'PRODUCTION',
             Environment::PRODUCTION->value,
         );
     }
@@ -41,7 +23,7 @@ final class EnvironmentTest extends TestCase
     public function sandboxHasCorrectValue(): void
     {
         $this->assertSame(
-            'https://api.sandbox.paymentic.com/v1_2',
+            'SANDBOX',
             Environment::SANDBOX->value,
         );
     }

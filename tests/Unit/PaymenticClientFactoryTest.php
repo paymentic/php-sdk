@@ -93,6 +93,23 @@ final class PaymenticClientFactoryTest extends TestCase
     }
 
     #[Test]
+    public function buildsClientWithCustomBaseUrl(): void
+    {
+        $psrClient = $this->createStub(ClientInterface::class);
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $streamFactory = $this->createStub(StreamFactoryInterface::class);
+
+        $client = PaymenticClientFactory::create('test-api-key')
+            ->withBaseUrl('https://api.staging.paymentic.com/v1_2')
+            ->withHttpClient($psrClient)
+            ->withRequestFactory($requestFactory)
+            ->withStreamFactory($streamFactory)
+            ->build();
+
+        $this->assertInstanceOf(PaymenticClient::class, $client);
+    }
+
+    #[Test]
     public function autoDiscoversGuzzleWhenNotProvided(): void
     {
         $client = PaymenticClientFactory::create('test-api-key')->build();
@@ -124,6 +141,7 @@ final class PaymenticClientFactoryTest extends TestCase
         $this->assertSame($factory, $factory->withEnvironment(Environment::SANDBOX));
         $this->assertSame($factory, $factory->withSandbox());
         $this->assertSame($factory, $factory->withProduction());
+        $this->assertSame($factory, $factory->withBaseUrl('https://api.staging.paymentic.com/v1_2'));
         $this->assertSame($factory, $factory->withHttpClient($psrClient));
         $this->assertSame($factory, $factory->withRequestFactory($requestFactory));
         $this->assertSame($factory, $factory->withStreamFactory($streamFactory));
