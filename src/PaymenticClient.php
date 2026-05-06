@@ -20,13 +20,17 @@ final class PaymenticClient
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
         Environment $environment = Environment::PRODUCTION,
+        ?string $baseUrl = null,
     ) {
         $internalClient = new HttpClient(
             $httpClient,
             $requestFactory,
             $streamFactory,
             $apiKey,
-            $environment->getBaseUrl(),
+            $baseUrl ?? match ($environment) {
+                Environment::PRODUCTION => 'https://api.paymentic.com/v1_2',
+                Environment::SANDBOX => 'https://api.sandbox.paymentic.com/v1_2',
+            },
         );
 
         $this->paymentClient = new PaymentClient($internalClient);

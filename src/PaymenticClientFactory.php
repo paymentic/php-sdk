@@ -15,6 +15,7 @@ class PaymenticClientFactory
 {
     private string $apiKey;
     private Environment $environment = Environment::PRODUCTION;
+    private ?string $baseUrl = null;
     private ?ClientInterface $httpClient = null;
     private ?RequestFactoryInterface $requestFactory = null;
     private ?StreamFactoryInterface $streamFactory = null;
@@ -50,6 +51,13 @@ class PaymenticClientFactory
         return $this;
     }
 
+    public function withBaseUrl(string $baseUrl): self
+    {
+        $this->baseUrl = $baseUrl;
+
+        return $this;
+    }
+
     public function withHttpClient(ClientInterface $client): self
     {
         $this->httpClient = $client;
@@ -79,6 +87,7 @@ class PaymenticClientFactory
             requestFactory: $this->requestFactory ?? $this->discoverRequestFactory(),
             streamFactory: $this->streamFactory ?? $this->discoverStreamFactory(),
             environment: $this->environment,
+            baseUrl: $this->baseUrl,
         );
     }
 
