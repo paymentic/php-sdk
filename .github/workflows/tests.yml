@@ -53,10 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4', '8.5']
-        laravel: ['11.*', '12.*', '13.*']
+        laravel: ['12.*', '13.*']
         exclude:
-          - php: '8.2'
-            laravel: '12.*'
           - php: '8.2'
             laravel: '13.*'
 
@@ -94,12 +92,12 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4', '8.5']
-        symfony: ['7.0', '7.1', '7.2', '8.0']
+        symfony: ['7.4', '8.1']
         exclude:
           - php: '8.2'
-            symfony: '8.0'
+            symfony: '8.1'
           - php: '8.3'
-            symfony: '8.0'
+            symfony: '8.1'
 
     name: Symfony ${{ matrix.symfony }} / PHP ${{ matrix.php }}
 
