@@ -7,11 +7,16 @@ namespace Paymentic\Sdk\Integration\Laravel;
 use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\Factory as LaravelHttpFactory;
+use Illuminate\Mail\MailManager;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\ServiceProvider;
 use Paymentic\Sdk\Environment;
+use Paymentic\Sdk\Integration\Laravel\Notifications\PaymenticSmsChannel;
+use Paymentic\Sdk\Integration\Mailer\PaymenticMailerTransport;
 use Paymentic\Sdk\Payment\Webhook\PaymentWebhookHandlerFactory;
 use Paymentic\Sdk\PaymenticClient;
 use Paymentic\Sdk\Shared\Webhook\WebhookHandler;
+use Symfony\Component\Mailer\Transport\AbstractTransport;
 
 final class PaymenticServiceProvider extends ServiceProvider
 {
@@ -44,6 +49,9 @@ final class PaymenticServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(WebhookHandler::class, 'paymentic.webhook');
+
+        $this->registerNotificationChannels();
+        $this->registerMailTransport();
     }
 
     public function boot(): void
@@ -53,5 +61,40 @@ final class PaymenticServiceProvider extends ServiceProvider
                 __DIR__ . '/config/paymentic.php' => config_path('paymentic.php'),
             ], 'paymentic-config');
         }
+    }
+
+    private function registerNotificationChannels(): void
+    {
+        if (! class_exists(ChannelManager::class)) {
+            return;
+        }
+
+        $this->app->singleton(PaymenticSmsChannel::class, static function (Application $app): PaymenticSmsChannel {
+            /** @var string|null $sender */
+            $sender = $app['config']['paymentic.messaging.sms.sender'] ?? null;
+
+            return new PaymenticSmsChannel(
+                $app->make(PaymenticClient::class)->messaging(),
+                '' === $sender ? null : $sender,
+            );
+        });
+
+        $this->callAfterResolving(ChannelManager::class, static function (ChannelManager $manager): void {
+            $manager->extend('paymentic-sms', fn (Application $app): PaymenticSmsChannel => $app->make(PaymenticSmsChannel::class));
+        });
+    }
+
+    private function registerMailTransport(): void
+    {
+        if (! class_exists(MailManager::class) || ! class_exists(AbstractTransport::class)) {
+            return;
+        }
+
+        $this->callAfterResolving('mail.manager', function (MailManager $manager): void {
+            $app = $this->app;
+            $manager->extend('paymentic', static fn (array $config): PaymenticMailerTransport => new PaymenticMailerTransport(
+                $app->make(PaymenticClient::class)->messaging()->email(),
+            ));
+        });
     }
 }

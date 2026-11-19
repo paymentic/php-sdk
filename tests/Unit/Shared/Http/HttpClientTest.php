@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Paymentic\Tests\Unit\Shared\Http;
 
 use Paymentic\Sdk\Shared\Exception\BadRequestException;
+use Paymentic\Sdk\Shared\Exception\ForbiddenException;
 use Paymentic\Sdk\Shared\Exception\NotFoundException;
 use Paymentic\Sdk\Shared\Exception\UnauthorizedException;
 use Paymentic\Sdk\Shared\Exception\ValidationException;
 use Paymentic\Sdk\Shared\Http\HttpClient;
+use Paymentic\Tests\Support\MockHttpClient;
 use Paymentic\Tests\Support\MockPsrClient;
 use Paymentic\Tests\Support\MockRequestFactory;
 use Paymentic\Tests\Support\MockStreamFactory;
@@ -186,5 +188,79 @@ final class HttpClientTest extends TestCase
 
         $request = $this->psrClient->getLastRequest();
         $this->assertNotNull($request);
+    }
+
+    #[Test]
+    public function sendsDeleteRequest(): void
+    {
+        $this->psrClient->setResponse(['data' => []]);
+
+        $result = $this->httpClient->delete('/messaging/email/suppressions/ID-1');
+
+        $this->assertSame(['data' => []], $result);
+
+        $request = $this->psrClient->getLastRequest();
+        $this->assertNotNull($request);
+        $this->assertSame('DELETE', $request->getMethod());
+        $this->assertStringEndsWith('/messaging/email/suppressions/ID-1', (string) $request->getUri());
+    }
+
+    #[Test]
+    public function sendsCustomHeaders(): void
+    {
+        $this->psrClient->setResponse([]);
+
+        $this->httpClient->post('/test', ['key' => 'value'], ['X-Idempotency-Key' => 'abc']);
+
+        $request = $this->psrClient->getLastRequest();
+        $this->assertNotNull($request);
+        $this->assertSame('abc', $request->getHeaderLine('X-Idempotency-Key'));
+        $this->assertSame('Bearer test-api-key', $request->getHeaderLine('Authorization'));
+    }
+
+    #[Test]
+    public function getWithoutHeadersStaysBackwardCompatible(): void
+    {
+        $this->psrClient->setResponse(['data' => ['ok' => true]]);
+
+        $result = $this->httpClient->get('/test');
+
+        $this->assertSame(['data' => ['ok' => true]], $result);
+
+        $request = $this->psrClient->getLastRequest();
+        $this->assertNotNull($request);
+        $this->assertFalse($request->hasHeader('X-Idempotency-Key'));
+        $this->assertSame('application/json', $request->getHeaderLine('Accept'));
+    }
+
+    #[Test]
+    public function returnsEmptyArrayForEmptySuccessBody(): void
+    {
+        $httpClient = new HttpClient(
+            new MockHttpClient('', 200),
+            new MockRequestFactory(),
+            new MockStreamFactory(),
+            'test-api-key',
+            'https://api.paymentic.com/v1_2',
+        );
+
+        $this->assertSame([], $httpClient->get('/test'));
+    }
+
+    #[Test]
+    public function throwsMappedExceptionForEmptyErrorBody(): void
+    {
+        $httpClient = new HttpClient(
+            new MockHttpClient('', 403),
+            new MockRequestFactory(),
+            new MockStreamFactory(),
+            'test-api-key',
+            'https://api.paymentic.com/v1_2',
+        );
+
+        $this->expectException(ForbiddenException::class);
+        $this->expectExceptionMessage('An error occurred');
+
+        $httpClient->get('/test');
     }
 }

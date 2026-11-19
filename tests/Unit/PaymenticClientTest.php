@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paymentic\Tests\Unit;
 
 use Paymentic\Sdk\Environment;
+use Paymentic\Sdk\Messaging\MessagingClient;
 use Paymentic\Sdk\Payment\PaymentClient;
 use Paymentic\Sdk\PaymenticClient;
 use Paymentic\Tests\Support\MockPsrClient;
@@ -29,6 +30,22 @@ final class PaymenticClientTest extends TestCase
         $client = $this->createClient();
 
         $this->assertSame($client->payment(), $client->payment());
+    }
+
+    #[Test]
+    public function returnsMessagingClient(): void
+    {
+        $client = $this->createClient();
+
+        $this->assertInstanceOf(MessagingClient::class, $client->messaging());
+    }
+
+    #[Test]
+    public function returnsSameMessagingClientInstance(): void
+    {
+        $client = $this->createClient();
+
+        $this->assertSame($client->messaging(), $client->messaging());
     }
 
     #[Test]

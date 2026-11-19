@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Paymentic\Sdk\Shared\Http;
 
 use Paymentic\Sdk\Shared\Exception\BadRequestException;
+use Paymentic\Sdk\Shared\Exception\ConflictException;
+use Paymentic\Sdk\Shared\Exception\ForbiddenException;
 use Paymentic\Sdk\Shared\Exception\NotFoundException;
+use Paymentic\Sdk\Shared\Exception\PayloadTooLargeException;
 use Paymentic\Sdk\Shared\Exception\PaymenticException;
+use Paymentic\Sdk\Shared\Exception\PaymentRequiredException;
 use Paymentic\Sdk\Shared\Exception\UnauthorizedException;
 use Paymentic\Sdk\Shared\Exception\ValidationException;
 use Paymentic\Sdk\Shared\ValueObject\ApiError;
@@ -26,7 +30,11 @@ final class ErrorResponseHandler
         throw match ($statusCode) {
             400 => new BadRequestException($message, $errors, $statusCode),
             401 => new UnauthorizedException($message, $errors, $statusCode),
+            402 => new PaymentRequiredException($message, $errors, $statusCode),
+            403 => new ForbiddenException($message, $errors, $statusCode),
             404 => new NotFoundException($message, $errors, $statusCode),
+            409 => new ConflictException($message, $errors, $statusCode),
+            413 => new PayloadTooLargeException($message, $errors, $statusCode),
             422 => new ValidationException($message, $errors, $statusCode),
             default => new PaymenticException($message, $errors, $statusCode),
         };
