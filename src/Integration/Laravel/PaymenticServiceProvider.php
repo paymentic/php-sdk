@@ -80,7 +80,7 @@ final class PaymenticServiceProvider extends ServiceProvider
         });
 
         $this->callAfterResolving(ChannelManager::class, static function (ChannelManager $manager): void {
-            $manager->extend('paymentic-sms', static fn (Application $app): PaymenticSmsChannel => $app->make(PaymenticSmsChannel::class));
+            $manager->extend('paymentic-sms', fn (Application $app): PaymenticSmsChannel => $app->make(PaymenticSmsChannel::class));
         });
     }
 
