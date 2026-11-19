@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Paymentic\Sdk;
 
+use Paymentic\Sdk\Messaging\MessagingClient;
 use Paymentic\Sdk\Payment\PaymentClient;
 use Paymentic\Sdk\Shared\Http\HttpClient;
 use Psr\Http\Client\ClientInterface;
@@ -13,6 +14,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 final class PaymenticClient
 {
     private PaymentClient $paymentClient;
+    private MessagingClient $messagingClient;
 
     public function __construct(
         string $apiKey,
@@ -34,10 +36,16 @@ final class PaymenticClient
         );
 
         $this->paymentClient = new PaymentClient($internalClient);
+        $this->messagingClient = new MessagingClient($internalClient);
     }
 
     public function payment(): PaymentClient
     {
         return $this->paymentClient;
+    }
+
+    public function messaging(): MessagingClient
+    {
+        return $this->messagingClient;
     }
 }

@@ -6,8 +6,12 @@ namespace Paymentic\Tests\Unit\Infrastructure\Http;
 
 use Paymentic\Sdk\Shared\Enum\ApiErrorCode;
 use Paymentic\Sdk\Shared\Exception\BadRequestException;
+use Paymentic\Sdk\Shared\Exception\ConflictException;
+use Paymentic\Sdk\Shared\Exception\ForbiddenException;
 use Paymentic\Sdk\Shared\Exception\NotFoundException;
+use Paymentic\Sdk\Shared\Exception\PayloadTooLargeException;
 use Paymentic\Sdk\Shared\Exception\PaymenticException;
+use Paymentic\Sdk\Shared\Exception\PaymentRequiredException;
 use Paymentic\Sdk\Shared\Exception\UnauthorizedException;
 use Paymentic\Sdk\Shared\Exception\ValidationException;
 use Paymentic\Sdk\Shared\Http\ErrorResponseHandler;
@@ -155,5 +159,99 @@ final class ErrorResponseHandlerTest extends TestCase
         $this->expectExceptionMessage('An error occurred');
 
         ErrorResponseHandler::handle(500, ['errors' => []]);
+    }
+
+    /**
+     * @throws PaymenticException
+     */
+    #[Test]
+    public function throwsPaymentRequiredExceptionFor402(): void
+    {
+        $this->expectException(PaymentRequiredException::class);
+        $this->expectExceptionMessage('Error 402');
+        $this->expectExceptionCode(402);
+
+        ErrorResponseHandler::handle(402, [
+            'errors' => [['message' => 'Error 402']],
+        ]);
+    }
+
+    /**
+     * @throws PaymenticException
+     */
+    #[Test]
+    public function throwsForbiddenExceptionFor403(): void
+    {
+        $this->expectException(ForbiddenException::class);
+        $this->expectExceptionMessage('Error 403');
+        $this->expectExceptionCode(403);
+
+        ErrorResponseHandler::handle(403, [
+            'errors' => [['message' => 'Error 403']],
+        ]);
+    }
+
+    /**
+     * @throws PaymenticException
+     */
+    #[Test]
+    public function throwsConflictExceptionFor409(): void
+    {
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessage('Error 409');
+        $this->expectExceptionCode(409);
+
+        ErrorResponseHandler::handle(409, [
+            'errors' => [['message' => 'Error 409']],
+        ]);
+    }
+
+    /**
+     * @throws PaymenticException
+     */
+    #[Test]
+    public function throwsPayloadTooLargeExceptionFor413(): void
+    {
+        $this->expectException(PayloadTooLargeException::class);
+        $this->expectExceptionMessage('Error 413');
+        $this->expectExceptionCode(413);
+
+        ErrorResponseHandler::handle(413, [
+            'errors' => [['message' => 'Error 413']],
+        ]);
+    }
+
+    #[Test]
+    public function keepsGenericPaymenticExceptionFor405(): void
+    {
+        $this->expectException(PaymenticException::class);
+
+        try {
+            ErrorResponseHandler::handle(405, [
+                'errors' => [['message' => 'Error 405']],
+            ]);
+        } catch (PaymenticException $e) {
+            $this->assertSame(PaymenticException::class, $e::class);
+            $this->assertSame(405, $e->getCode());
+
+            throw $e;
+        }
+    }
+
+    #[Test]
+    public function keepsGenericPaymenticExceptionFor415(): void
+    {
+        $this->expectException(PaymenticException::class);
+
+        try {
+            ErrorResponseHandler::handle(415, [
+                'errors' => [['message' => 'Error 415']],
+            ]);
+        } catch (PaymenticException $e) {
+            $this->assertSame(PaymenticException::class, $e::class);
+            $this->assertSame(415, $e->getCode());
+
+            throw $e;
+        }
     }
 }

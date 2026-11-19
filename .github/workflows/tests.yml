@@ -75,10 +75,11 @@ jobs:
 
       - name: Install Laravel ${{ matrix.laravel }}
         run: |
-          composer remove symfony/http-kernel symfony/config symfony/dependency-injection symfony/http-client --dev --no-update
+          composer remove symfony/http-kernel symfony/config symfony/dependency-injection symfony/http-client symfony/notifier --dev --no-update
           composer require "illuminate/http:${{ matrix.laravel }}" \
                           "illuminate/support:${{ matrix.laravel }}" \
                           "illuminate/contracts:${{ matrix.laravel }}" \
+                          "illuminate/notifications:${{ matrix.laravel }}" \
                           "orchestra/testbench:*" \
                           --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
@@ -115,16 +116,18 @@ jobs:
 
       - name: Install Symfony ${{ matrix.symfony }}
         run: |
-          composer remove illuminate/http illuminate/support illuminate/contracts orchestra/testbench --dev --no-update
-          composer require "symfony/http-kernel:^${{ matrix.symfony }}" \
-                          "symfony/config:^${{ matrix.symfony }}" \
-                          "symfony/dependency-injection:^${{ matrix.symfony }}" \
-                          "symfony/http-client:^${{ matrix.symfony }}" \
+          composer remove illuminate/http illuminate/support illuminate/contracts illuminate/notifications orchestra/testbench --dev --no-update
+          composer require "symfony/http-kernel:~${{ matrix.symfony }}.0" \
+                          "symfony/config:~${{ matrix.symfony }}.0" \
+                          "symfony/dependency-injection:~${{ matrix.symfony }}.0" \
+                          "symfony/http-client:~${{ matrix.symfony }}.0" \
+                          "symfony/notifier:~${{ matrix.symfony }}.0" \
+                          "symfony/mailer:~${{ matrix.symfony }}.0" \
                           --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run Symfony integration tests
-        run: vendor/bin/phpunit --testsuite=Symfony --no-coverage --colors=always
+        run: vendor/bin/phpunit --testsuite=Symfony,Mailer --no-coverage --colors=always
 
   coverage:
     runs-on: ubuntu-latest

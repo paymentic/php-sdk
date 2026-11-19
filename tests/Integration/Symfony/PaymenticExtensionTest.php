@@ -6,6 +6,8 @@ namespace Paymentic\Tests\Integration\Symfony;
 
 use Paymentic\Sdk\Environment;
 use Paymentic\Sdk\Integration\Symfony\DependencyInjection\PaymenticExtension;
+use Paymentic\Sdk\Integration\Symfony\Mailer\PaymenticMailerTransportFactory;
+use Paymentic\Sdk\Integration\Symfony\Notifier\PaymenticTransportFactory;
 use Paymentic\Sdk\PaymenticClient;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -13,6 +15,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 final class PaymenticExtensionTest extends TestCase
@@ -97,6 +100,50 @@ final class PaymenticExtensionTest extends TestCase
         $arguments = $definition->getArguments();
 
         $this->assertSame('my-secret-key', $arguments[0]);
+    }
+
+    #[Test]
+    public function registersNotifierTransportFactoryWithTexterTag(): void
+    {
+        $container = $this->createContainer(['api_key' => 'test-api-key']);
+
+        $this->assertTrue($container->getDefinition(PaymenticTransportFactory::class)->hasTag('texter.transport_factory'));
+    }
+
+    #[Test]
+    public function transportFactoryReferencesAreOptional(): void
+    {
+        $container = $this->createContainer(['api_key' => 'test-api-key']);
+
+        $arguments = $container->getDefinition(PaymenticTransportFactory::class)->getArguments();
+
+        $this->assertCount(5, $arguments);
+        foreach ($arguments as $argument) {
+            $this->assertInstanceOf(Reference::class, $argument);
+            $this->assertSame(ContainerInterface::IGNORE_ON_INVALID_REFERENCE, $argument->getInvalidBehavior());
+        }
+    }
+
+    #[Test]
+    public function registersMailerTransportFactoryWithMailerTag(): void
+    {
+        $container = $this->createContainer(['api_key' => 'test-api-key']);
+
+        $this->assertTrue($container->getDefinition(PaymenticMailerTransportFactory::class)->hasTag('mailer.transport_factory'));
+    }
+
+    #[Test]
+    public function mailerTransportFactoryReferencesAreOptional(): void
+    {
+        $container = $this->createContainer(['api_key' => 'test-api-key']);
+
+        $arguments = $container->getDefinition(PaymenticMailerTransportFactory::class)->getArguments();
+
+        $this->assertCount(6, $arguments);
+        foreach ($arguments as $argument) {
+            $this->assertInstanceOf(Reference::class, $argument);
+            $this->assertSame(ContainerInterface::IGNORE_ON_INVALID_REFERENCE, $argument->getInvalidBehavior());
+        }
     }
 
     /**

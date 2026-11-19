@@ -30,7 +30,10 @@
     "symfony/http-kernel": "^7.0||^8.0",
     "symfony/config": "^7.0||^8.0",
     "symfony/dependency-injection": "^7.0||^8.0",
-    "symfony/http-client": "^7.0||^8.0"
+    "symfony/http-client": "^7.0||^8.0",
+    "illuminate/notifications": "^11.0||^12.0||^13.0",
+    "symfony/notifier": "^7.0||^8.0",
+    "symfony/mailer": "^7.0||^8.0"
   },
   "suggest": {
     "guzzlehttp/guzzle": "For using Guzzle HTTP client implementation",
@@ -39,7 +42,10 @@
     "symfony/http-kernel": "Required for Symfony integration (^7.0|^8.0)",
     "symfony/config": "Required for Symfony integration (^7.0|^8.0)",
     "symfony/dependency-injection": "Required for Symfony integration (^7.0|^8.0)",
-    "symfony/http-client": "Required for Symfony HTTP client integration (^7.0|^8.0)"
+    "symfony/http-client": "Required for Symfony HTTP client integration (^7.0|^8.0)",
+    "illuminate/notifications": "Required for the Laravel SMS notification channel (paymentic-sms)",
+    "symfony/notifier": "Required for Symfony Notifier transport (paymentic://)",
+    "symfony/mailer": "Required for the Paymentic mailer transport (Laravel MAIL_MAILER=paymentic, Symfony paymentic+api://)"
   },
   "extra": {
     "laravel": {

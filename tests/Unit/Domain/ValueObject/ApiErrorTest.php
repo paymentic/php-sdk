@@ -28,6 +28,23 @@ final class ApiErrorTest extends TestCase
     }
 
     #[Test]
+    public function ignoresNonStringFieldValues(): void
+    {
+        $error = ApiError::fromArray([
+            'message' => 'Bad',
+            'field' => ['x'],
+            'details' => ['field' => 123],
+        ]);
+        $this->assertNull($error->field);
+
+        $fromDetails = ApiError::fromArray(['message' => 'Bad', 'details' => ['field' => 'email']]);
+        $this->assertSame('email', $fromDetails->field);
+
+        $topLevelWins = ApiError::fromArray(['message' => 'Bad', 'field' => 'phone', 'details' => ['field' => 'email']]);
+        $this->assertSame('phone', $topLevelWins->field);
+    }
+
+    #[Test]
     public function createsWithOnlyMessage(): void
     {
         $error = new ApiError(message: 'Something went wrong');
@@ -110,5 +127,48 @@ final class ApiErrorTest extends TestCase
         $errors = ApiError::fromArrayList([]);
 
         $this->assertSame([], $errors);
+    }
+
+    #[Test]
+    public function parsesDetails(): void
+    {
+        $error = ApiError::fromArray([
+            'message' => 'Recipient suppressed',
+            'code' => 'EMAIL_RECIPIENT_SUPPRESSED',
+            'details' => ['recipients' => ['a@b.pl']],
+        ]);
+
+        $this->assertSame(['recipients' => ['a@b.pl']], $error->details);
+        $this->assertNull($error->field);
+        $this->assertSame(ApiErrorCode::EMAIL_RECIPIENT_SUPPRESSED, $error->code);
+    }
+
+    #[Test]
+    public function fieldFallsBackToDetailsField(): void
+    {
+        $error = ApiError::fromArray([
+            'message' => 'Invalid',
+            'details' => ['field' => 'recipient'],
+        ]);
+
+        $this->assertSame('recipient', $error->field);
+    }
+
+    #[Test]
+    public function topLevelFieldWinsOverDetailsField(): void
+    {
+        $error = ApiError::fromArray([
+            'message' => 'Invalid',
+            'field' => 'top',
+            'details' => ['field' => 'nested'],
+        ]);
+
+        $this->assertSame('top', $error->field);
+    }
+
+    #[Test]
+    public function detailsAreNullWhenMissing(): void
+    {
+        $this->assertNull(ApiError::fromArray(['message' => 'Error'])->details);
     }
 }

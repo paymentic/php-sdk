@@ -6,6 +6,7 @@ namespace Paymentic\Tests\Integration\Laravel;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Orchestra\Testbench\TestCase;
+use Paymentic\Sdk\Integration\Laravel\Notifications\PaymenticSmsChannel;
 use Paymentic\Sdk\Integration\Laravel\PaymenticServiceProvider;
 use Paymentic\Sdk\PaymenticClient;
 use Paymentic\Sdk\Shared\Webhook\WebhookHandler;
@@ -121,5 +122,25 @@ final class PaymenticServiceProviderTest extends TestCase
         $handler2 = $this->app->make(WebhookHandler::class);
 
         $this->assertSame($handler1, $handler2);
+    }
+
+    #[Test]
+    public function loadsMessagingDefaultsConfiguration(): void
+    {
+        $this->app['config']->set('paymentic', require __DIR__ . '/../../../src/Integration/Laravel/config/paymentic.php');
+
+        $this->assertNull(config('paymentic.messaging.sms.sender'));
+    }
+
+    /**
+     * @throws BindingResolutionException
+     */
+    #[Test]
+    public function registersSmsChannelSingleton(): void
+    {
+        $this->assertSame(
+            $this->app->make(PaymenticSmsChannel::class),
+            $this->app->make(PaymenticSmsChannel::class),
+        );
     }
 }
